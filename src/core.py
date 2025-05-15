@@ -9,7 +9,7 @@ class Base:
 
 
 engine = create_async_engine(
-    f"postgresql+asyncpg://root:root@localhost/blogging_platform",
+    "postgresql+asyncpg://root:root@localhost/blogging_platform",
     echo=True,
 )
 

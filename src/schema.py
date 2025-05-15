@@ -39,6 +39,12 @@ class PostUpdateSchema(BaseSchema):
     tags: List[TagUpdateSchema] | None = None
 
 
+class PostQuery(BaseSchema):
+    date_from: datetime | None = None  # от какой
+    date_to: datetime | None = None  # до какой
+    tags: List[TagBase] | None
+
+
 class PostResponse(PostBase):
     id: int
     created_at: datetime

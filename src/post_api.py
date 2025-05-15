@@ -1,9 +1,16 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import Post, Tag
-from schema import PostCreateSchema, PostResponse, PostUpdateSchema, TagResponse
+from schema import (
+    PostCreateSchema,
+    PostQuery,
+    PostResponse,
+    PostUpdateSchema,
+    TagResponse,
+)
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import get_db
@@ -94,7 +101,7 @@ async def update(
     return post
 
 
-@post_router.delete("/delete/{id}")
+@post_router.delete("/delete/{id}", status_code=status.HTTP_200_OK)
 async def delete(id: int, session: AsyncSession = Depends(get_db)):
     post = await session.get(Post, id)
     if post is None:
@@ -104,3 +111,23 @@ async def delete(id: int, session: AsyncSession = Depends(get_db)):
         )
     await session.delete(post)
     return status.HTTP_200_OK
+
+
+@post_router.post(
+    "/", status_code=status.HTTP_200_OK, response_model=List[PostResponse]
+)
+async def get_by_query(query: PostQuery, session: AsyncSession = Depends(get_db)):
+    stmt = select(Post).options(selectinload(Post.tags))
+
+    if query.date_to:
+        stmt = stmt.where(Post.created_at < query.date_to)
+    if query.date_from:
+        stmt = stmt.where(Post.created_at > query.date_from)
+    if query.tags and len(query.tags) != 0:
+        stmt = stmt.where(Post.tags.any(Tag.name.in_([tag.name for tag in query.tags])))
+
+    print(stmt)
+    result = await session.execute(stmt)
+    posts = result.scalars().all()
+
+    return posts
