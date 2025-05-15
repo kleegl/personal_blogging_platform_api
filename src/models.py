@@ -1,5 +1,6 @@
+from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, DateTime
-from sqlalchemy.orm import Relationship
+from sqlalchemy.orm import Relationship, Mapped
 from datetime import datetime, UTC
 
 from core import Base
@@ -17,7 +18,9 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(Unicode(128), unique=True, nullable=False)
-    posts = Relationship("Post", secondary="post_tags", back_populates="tags")
+    posts: Mapped[List["Post"]] = Relationship(
+        "Post", secondary="post_tags", back_populates="tags"
+    )
 
 
 class Post(Base):
@@ -32,4 +35,6 @@ class Post(Base):
         insert_default=datetime.now(UTC),
         onupdate=datetime.now(UTC),
     )
-    tags = Relationship("Tag", secondary="post_tags", back_populates="posts")
+    tags: Mapped[List["Tag"]] = Relationship(
+        "Tag", secondary="post_tags", back_populates="posts"
+    )

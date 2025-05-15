@@ -1,11 +1,13 @@
-from fastapi import FastAPI
-from api import post_router
+from fastapi import FastAPI, status
+from post_api import post_router
+from tag_api import tag_router
 
 app = FastAPI()
 
 app.include_router(post_router)
+app.include_router(tag_router)
 
 
-@app.get("/health_check")
-async def get():
-    return "success"
+@app.get("/health")
+async def get_health():
+    return status.HTTP_200_OK
