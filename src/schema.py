@@ -21,7 +21,6 @@ class TagUpdateSchema(BaseSchema):
 
 class TagResponse(TagBase):
     id: int
-    pass
 
 
 class PostBase(BaseSchema):
